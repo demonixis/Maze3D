@@ -1,7 +1,9 @@
-var Demonixis = Demonixis || {};
+var Demonixis = window.Demonixis || {};
+Demonixis.Gui = Demonixis.Gui || {};
 
-Demonixis.MiniMap = function (width, height)
+Demonixis.Gui.MiniMap = function (width, height, parent)
 {
+    this.parent = parent;
     this.width = width;
     this.height = height;
     this.blockSize = { width: 5, height: 5};
@@ -12,36 +14,18 @@ Demonixis.MiniMap = function (width, height)
     this.create = function(top, left, position, border)
     {
         var stylePosition = "position:absolute;";
-        var styleTop = "10px;";
-        var styleLeft = "10px;";
-        var styleBorder = "1px solid black;";
-        
-        if (typeof position != 'undefined')
-        {
-            stylePosition = "position:" + position + ";";
-        }
-        
-        if (typeof top != 'undefined') 
-        {
-            styleTop = "top:" + top + "px;";
-        }
-        
-        if (typeof left != 'undefined')
-        {
-            styleLeft = "left:" + left + "px;";
-        }
-        
-        if (typeof border != 'undefined')
-        {
-            styleBorder = "border:" + border + ";";
-        }
+        var styleTop = (top || "10") + "px;";
+        var styleLeft = (left || "10") + "px;";
+        var styleBorder = (border || "1px solid black") + ";";
         
         this.miniMap.setAttribute("width", this.width * this.blockSize.width);
         this.miniMap.setAttribute("height", this.height * this.blockSize.height);
         this.miniMap.setAttribute("id", "miniMap");
         this.miniMap.setAttribute("style", stylePosition + "top:" + styleTop + "left:" + styleLeft + styleBorder);
         
-        document.getElementById("canvasContainer").appendChild(this.miniMap);
+        var domElement = document.getElementById(this.parent);
+        if (domElement[0] != "undefined") { domElement.removeChild[domElement[0]]; }
+        domElement.appendChild(this.miniMap);
     }
     
     this.draw = function(x, y, id)
