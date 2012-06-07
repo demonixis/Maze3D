@@ -20,10 +20,10 @@ Demonixis.GraphicsHelper.createCube = function (material, position, size, scale,
 	var oRotation = rotation || { x: 0, y: 0, z: 0 };
 
 	object3D = new THREE.Mesh(new THREE.CubeGeometry(oSize.x, oSize.y, oSize.z), oMaterial);
-  object3D.scale.set(oScale.x, oScale.y,oScale.z);
-  object3D.position.set(oPosition.x, oPosition.y, oPosition.z);
-  object3D.rotation.set(oRotation.x, oRotation.y, oRotation.z);
-  object3D.overdraw = true;
+	object3D.scale.set(oScale.x, oScale.y,oScale.z);
+	object3D.position.set(oPosition.x, oPosition.y, oPosition.z);
+	object3D.rotation.set(oRotation.x, oRotation.y, oRotation.z);
+	object3D.overdraw = true;
 
   return object3D;
 }
