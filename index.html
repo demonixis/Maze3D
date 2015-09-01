@@ -1,138 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-	<meta charset="utf-8" />
-	<title>Lost in a space maze : A WebGL 3D game</title>
-	<style>
-		html, body {
-			width: 100%;
-			height: 100%;
-			overflow: hidden;
-			margin: 0;
-			padding: 0;
-		}
-		#mazeCanvas {
-			width: 100%;
-			height: 100%;
-		}
-	</style>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Maze 3D</title>
+    <meta name="description" content="Maze 3D for WebGL with Three.js" />
+    <meta name="author" content="Yannick Comte" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" media="screen" href="assets/css/style.css" />
+    <style>
+      
+    </style>
 </head>
 <body>
-	<canvas id="mazeCanvas"></canvas>
-	<script src="assets/js/babylon.js"></script>
-	<script>
-     var canvas;
-     var engine;
-     var camera;
-     var scene;
-     var map = [];
+  <img style="display:none" src="assets/images/preview-laby.png" alt="sharing image" />
 
-     window.onload = function () {
-         var ajax = new XMLHttpRequest();
-         var level = 1;
-         ajax.open("GET", "assets/maps/maze3d-" + level + ".json", true);
-         ajax.onreadystatechange = function () {
-             if (ajax.readyState == 4) {
-                 map = JSON.parse(ajax.responseText);
-                 initialize();
-                 construct();
-                 run();
-             }
-         }
-         ajax.send(null);
-     };
+  <div id="canvasContainer">
+    <div id="joypad">
+        <div class="top">
+            <a href="javascript:void(0);" class="joykey" id="keyup"><img src="assets/images/pad/kbup.png" /></a>
+        </div>
+        <div class="bottom">
+            <a href="javascript:void(0);" class="joykey" id="keyleft"><img src="assets/images/pad/kbleft.png" /></a>
+            <a href="javascript:void(0);" class="joykey" id="keydown"><img src="assets/images/pad/kbdown.png" /></a>
+            <a href="javascript:void(0);" class="joykey" id="keyright"><img src="assets/images/pad/kbright.png" /></a>
+        </div>
+    </div>
+  </div>
 
-     function initialize() {
-         canvas = document.getElementById("mazeCanvas");
-         engine = new BABYLON.Engine(canvas, true);
-         scene = new BABYLON.Scene(engine);
-         scene.collisionsEnabled = true;
-         scene.gravity = new BABYLON.Vector3(0, -9, 0);
-         camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 0, -10), scene);
-         camera.attachControl(canvas);
-         camera.checkCollisions = true;
-         camera.applyGravity = true;
-         //camera.ellipsoid = new BABYLON.Vector3(0.5, 1, 0.5);
-
-         var light = new BABYLON.PointLight("light", new BABYLON.Vector3(0, 100, -100), scene);
-
-         var light = new BABYLON.PointLight("light", new BABYLON.Vector3(0, 100, 100), scene);
-         var dir = new BABYLON.DirectionalLight("Dir0", new BABYLON.Vector3(0, 1, 1), scene);
-     }
-
-     function construct() {
-         var height = map.length;
-         var width = map[0].length;
-         var wallSize = 3;
-
-         var ground = new BABYLON.Mesh.createBox("ground", width * wallSize, scene);
-         ground.scaling.y = 0.1 / (width * wallSize);
-         ground.position.y = -wallSize / 2;
-         ground.position.x = (width * wallSize) / 2 - (wallSize / 2);
-         ground.position.z = (height * wallSize) / 2 - (wallSize / 2);
-         ground.checkCollisions = true;
-
-         var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-         groundMaterial.uScale = 0.5;
-         groundMaterial.vScale = 0.5;
-         groundMaterial.diffuseTexture = new BABYLON.Texture("assets/textures/ghofloor1a_diff.png", scene);
-         groundMaterial.normalTexture = new BABYLON.Texture("assets/textures/ghofloor1a_norm.png", scene);
-         groundMaterial.specularTexture = new BABYLON.Texture("assets/textures/ghofloor1a_spec.png", scene);
-         ground.material = groundMaterial;
-
-         var wallMaterial = new BABYLON.StandardMaterial("wallMaterial", scene);
-         wallMaterial.diffuseTexture = new BABYLON.Texture("assets/textures/sofloor1_diff.png", scene);
-         wallMaterial.diffuseTexture = new BABYLON.Texture("assets/textures/sofloor1_diff.png", scene);
-         wallMaterial.diffuseTexture = new BABYLON.Texture("assets/textures/sofloor1_spec.png", scene);
-
-         var sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
-         sphereMaterial.diffuseTexture = new BABYLON.Texture("assets/textures/cage1_diff.png", scene);
-         sphereMaterial.normalTexture = new BABYLON.Texture("assets/textures/cage1_normal.png", scene);
-         sphereMaterial.specularTexture = new BABYLON.Texture("assets/textures/cage1_spec.png", scene);
-
-         for (var y = 0; y < height; y++) {
-             for (var x = 0; x < width; x++) {
-                 switch (map[x][y]) {
-                     case 2:
-                         var wall = BABYLON.Mesh.createBox("wall", wallSize, scene);
-                         wall.position.x = x * wallSize;
-                         wall.position.z = y * wallSize;
-                         wall.material = wallMaterial;
-                         wall.checkCollisions = true;
-                         break;
-                     case 5:
-                     case 6:
-                         var sphere = BABYLON.Mesh.createBox("box", wallSize / 2, scene);
-                         sphere.position.x = x * wallSize;
-                         sphere.position.z = y * wallSize;
-                         sphere.position.y = -wallSize / 4;
-                         sphere.material = sphereMaterial;
-                         break;
-                     case 9:
-                         camera.position.x = x * wallSize;
-                         camera.position.y = 0.7;
-                         camera.position.z = y * wallSize;
-                         break;
-                 }
-             }
-         }
-     }
-
-     function run() {
-         scene.beforeRender = function () {
-
-         };
-
-
-         var loop = function () {
-             engine.beginFrame();
-             scene.render();
-             BABYLON.Tools.QueueNewFrame(loop);
-         };
-
-         // Request animation frame
-         BABYLON.Tools.QueueNewFrame(loop);
-     }
-	</script>	
+  <audio id="bumpSound">
+    <source src="assets/sound/bat.mp3" />
+    <source src="assets/sound/bat.ogg" />
+  </audio>
+  <script src="assets/js/Three.js"></script>
+  <script src="assets/js/Stats.js"></script>
+  <script src="assets/js/Demonixis.Input.js"></script>
+  <script src="assets/js/Demonixis.Minimap.js"></script>
+  <script src="assets/js/Demonixis.GraphicsHelper.js"></script>
+  <script src="assets/js/Demonixis.GameHelper.js"></script>
+  <script src="assets/js/maze3d.js"></script>
 </body>
 </html>

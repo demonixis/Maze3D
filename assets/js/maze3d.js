@@ -1,45 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Maze 3D</title>
-    <meta name="description" content="Maze 3D for WebGL with Three.js" />
-    <meta name="author" content="Yannick Comte" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" media="screen" href="assets/css/style.css" />
-    <style>
-      
-    </style>
-</head>
-<body>
-  <img style="display:none" src="assets/images/preview-laby.png" alt="sharing image" />
-
-  <div id="canvasContainer">
-    <div id="joypad">
-        <div class="top">
-            <a href="javascript:void(0);" class="joykey" id="keyup"><img src="assets/images/pad/kbup.png" /></a>
-        </div>
-        <div class="bottom">
-            <a href="javascript:void(0);" class="joykey" id="keyleft"><img src="assets/images/pad/kbleft.png" /></a>
-            <a href="javascript:void(0);" class="joykey" id="keydown"><img src="assets/images/pad/kbdown.png" /></a>
-            <a href="javascript:void(0);" class="joykey" id="keyright"><img src="assets/images/pad/kbright.png" /></a>
-        </div>
-    </div>
-  </div>
-
-  <audio id="bumpSound">
-    <source src="assets/sound/bat.mp3" />
-    <source src="assets/sound/bat.ogg" />
-  </audio>
-  <script src="assets/js/Three.js"></script>
-  <script src="assets/js/Stats.js"></script>
-  <script src="assets/js/Demonixis.Input.js"></script>
-  <script src="assets/js/Demonixis.Minimap.js"></script>
-  <script src="assets/js/Demonixis.GraphicsHelper.js"></script>
-  <script src="assets/js/Demonixis.GameHelper.js"></script>
-  <script>   
-    (function() {
+(function() {
       var width = window.innerWidth * 0.995;
       var height = window.innerHeight * 0.995;
       var canvasContainer = document.getElementById("canvasContainer");
@@ -75,8 +34,8 @@
           textures[2] = THREE.ImageUtils.loadTexture("assets/images/textures/aztec01.jpg");
           textures[3] = THREE.ImageUtils.loadTexture("assets/images/textures/tarmac02.jpg");
           
-          Demonixis.GraphicsHelper.repeatTexture(textures[0], {x:256, y:256});
-          Demonixis.GraphicsHelper.repeatTexture(textures[1], {x:256, y:256});
+          Demonixis.GraphicsHelper.repeatTexture(textures[0], {x:16, y:16});
+          Demonixis.GraphicsHelper.repeatTexture(textures[1], {x:16, y:16});
           
           document.getElementById("canvasContainer").appendChild(stats.domElement);
           document.getElementById("canvasContainer").appendChild(renderer.domElement);
@@ -93,12 +52,12 @@
           miniMap.create();
 
           var plateformeSize = {width: (map[0].length * 100), height: (map.length * 100) };
-          var sol = new THREE.Mesh(new THREE.CubeGeometry(plateformeSize.width, 5, plateformeSize.height), new THREE.MeshBasicMaterial({map: textures[0]}));
+          var sol = new THREE.Mesh(new THREE.CubeGeometry(plateformeSize.width, 5, plateformeSize.height), new THREE.MeshPhongMaterial({map: textures[0]}));
           sol.overdraw = true;
           sol.position.set(-50, 1, -50);
           scene.add(sol);
           
-          var plafond = new THREE.Mesh(new THREE.CubeGeometry(plateformeSize.width, 5, plateformeSize.height), new THREE.MeshBasicMaterial({map: textures[1]}));
+          var plafond = new THREE.Mesh(new THREE.CubeGeometry(plateformeSize.width, 5, plateformeSize.height), new THREE.MeshPhongMaterial({map: textures[1]}));
           plafond.position.set(-50, 100, -50);
           plafond.overdraw = true;
           scene.add(plafond);
@@ -352,6 +311,3 @@
         } 
       }
     })();
-  </script>
-</body>
-</html>
