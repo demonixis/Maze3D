@@ -2,13 +2,8 @@
     var width = window.innerWidth * 0.995;
     var height = window.innerHeight * 0.995;
     var canvasContainer = document.getElementById("canvasContainer");
-
     var renderer, camera, scene;
     var input, miniMap, levelHelper, CameraHelper;
-    var stats;
-
-    var textures = [];
-    var textLoaded = false;
     var map = new Array();
     var running = true;
 
@@ -26,30 +21,6 @@
         camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
         camera.position.y = 50;
 
-        stats = new Stats();
-        stats.domElement.style.position = "absolute";
-        stats.domElement.style.bottom = "0px";
-
-        textures.push(THREE.ImageUtils.loadTexture("assets/images/textures/roof_diffuse.jpg"));
-        textures.push(THREE.ImageUtils.loadTexture("assets/images/textures/ground_diffuse.jpg"));
-        textures.push(THREE.ImageUtils.loadTexture("assets/images/textures/wall_diffuse.png"));
-
-        Demonixis.GraphicsHelper.repeatTexture(textures[0], {
-            x: 16,
-            y: 16
-        });
-
-        Demonixis.GraphicsHelper.repeatTexture(textures[1], {
-            x: 2,
-            y: 2
-        });
-
-        Demonixis.GraphicsHelper.repeatTexture(textures[2], {
-            x: 2,
-            y: 2
-        });
-
-        document.getElementById("canvasContainer").appendChild(stats.domElement);
         document.getElementById("canvasContainer").appendChild(renderer.domElement);
 
         input = new Demonixis.Input();
@@ -80,51 +51,61 @@
         var timer = setTimeout(function() {
             clearTimeout(timer);
             document.body.removeChild(messageContainer);
-        }, 2000);
+        }, 3500);
     }
 
     function initializeScene() {
         miniMap = new Demonixis.Gui.MiniMap(map[0].length, map.length, "canvasContainer");
         miniMap.create();
 
-        var platformSize = {
-            width: (map[0].length * 100),
-            height: (map.length * 100)
-        };
+        var loader = new THREE.TextureLoader();
+        var platformWidth = map[0].length * 100;
+        var platformHeight = map.length * 100;
 
-        var ground = new THREE.Mesh(new THREE.BoxGeometry(platformSize.width, 5, platformSize.height), new THREE.MeshPhongMaterial({
-            map: textures[1]
+        var floorGeometry = new THREE.BoxGeometry(platformWidth, 5, platformHeight);
+        var ground = new THREE.Mesh(floorGeometry, new THREE.MeshPhongMaterial({
+            map: loader.load("assets/images/textures/ground_diffuse.jpg"),
         }));
+
+        repeatTexture(ground.material.map, 2);
 
         ground.position.set(-50, 1, -50);
         scene.add(ground);
 
-        var topMesh = new THREE.Mesh(new THREE.BoxGeometry(platformSize.width, 5, platformSize.height), new THREE.MeshPhongMaterial({
-            map: textures[0]
+        var topMesh = new THREE.Mesh(floorGeometry, new THREE.MeshPhongMaterial({
+            map: loader.load("assets/images/textures/roof_diffuse.jpg")
         }));
 
+        repeatTexture(topMesh.material.map, 16);
+
         topMesh.position.set(-50, 100, -50);
-        topMesh.overdraw = true;
         scene.add(topMesh);
 
+        var size = {
+            x: 100,
+            y: 100,
+            z: 100
+        };
+
+        var position = { 
+            x: 0, 
+            y: 0, 
+            z: 0 
+        };
+
+        var wallGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
         var wallMaterial = new THREE.MeshPhongMaterial({
-            map: textures[2]
+            map: loader.load("assets/images/textures/wall_diffuse.jpg")
         });
+
+        repeatTexture(wallMaterial.map, 2);
 
         // Map generation
         for (var y = 0, ly = map.length; y < ly; y++) {
             for (var x = 0, lx = map[x].length; x < lx; x++) {
-                var size = {
-                    x: 100,
-                    y: 100,
-                    z: 100
-                };
-
-                var position = {
-                    x: -platformSize.width / 2 + size.x * x,
-                    y: 50,
-                    z: -platformSize.height / 2 + size.z * y
-                };
+                position.x = -platformWidth / 2 + size.x * x;
+                position.y = 50;
+                position.z = -platformHeight / 2 + size.z * y;
 
                 if (x == 0 && y == 0) {
                     cameraHelper.origin.x = position.x;
@@ -133,13 +114,13 @@
                 }
 
                 if (map[y][x] > 1) {
-                    var id = map[y][x];
-                    var o3d = Demonixis.GraphicsHelper.createCube(wallMaterial, position, size);
-                    scene.add(o3d);
+                    var wall3D = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall3D.position.set(position.x, position.y, position.z);
+                    scene.add(wall3D);
                 }
-                if (map[y][x] == "D") {
-                    camera.position.set(position.x, position.y, position.z);
 
+                if (map[y][x] === "D") {
+                    camera.position.set(position.x, position.y, position.z);
                     cameraHelper.origin.position.x = position.x;
                     cameraHelper.origin.position.y = position.y;
                     cameraHelper.origin.position.z = position.z;
@@ -188,8 +169,6 @@
         } else if (input.joykeys.right) {
             moveCamera("right", params);
         }
-
-        stats.update();
     }
 
     function draw() {
@@ -307,6 +286,14 @@
             }
         }
         ajax.send(null);
+    }
+
+    function repeatTexture(texture, size) {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.x = size;
+        texture.repeat.y = size;
+        return texture;
     }
 
     // Game starting
