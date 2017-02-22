@@ -4,6 +4,7 @@
     var canvasContainer = document.getElementById("canvasContainer");
     var renderer = null;
 	var camera = null;
+    var player = null;
 	var	scene = null;
 	var effect = null;
 	var controls = null;
@@ -26,13 +27,22 @@
         scene.fog = new THREE.Fog(0x777777, 25, 1000);
 
         camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
-        camera.position.y = 50;
+        //camera.position.y = 50;
+
+        player = new THREE.Object3D();
+        scene.add(player);
+
+        var head = new THREE.Object3D();
+        head.position.y = 50;
+        head.add(camera);
+
+        player.add(head);
 
         document.getElementById("canvasContainer").appendChild(renderer.domElement);
 
         input = new Demonixis.Input();
         levelHelper = new Demonixis.GameHelper.LevelHelper();
-        cameraHelper = new Demonixis.GameHelper.CameraHelper(camera);
+        cameraHelper = new Demonixis.GameHelper.CameraHelper(player);
 		
 		controls = new THREE.VRControls(camera);
 		effect = new THREE.VREffect(renderer);
@@ -197,19 +207,23 @@
 		controls.update();
     }
 
+    function updateVREffect() {
+        effect.requestAnimationFrame(updateVREffect);
+        mainLoop();
+    }
+
     function draw() {
-		//effect.requestAnimationFrame(draw);
         renderer.render(scene, camera);
-		//effect.render(scene, camera);
+		effect.render(scene, camera);
     }
 
     function moveCamera(direction, delta) {
         var collides = false;
         var position = {
-            x: camera.position.x,
-            z: camera.position.z
+            x: player.position.x,
+            z: player.position.z
         };
-        var rotation = camera.rotation.y;
+        var rotation = player.rotation.y;
         var offset = 50;
 
         var moveParamaters = {
@@ -219,12 +233,12 @@
 
         switch (direction) {
             case "up":
-                position.x -= Math.sin(-camera.rotation.y) * -moveParamaters.translation;
-                position.z -= Math.cos(-camera.rotation.y) * moveParamaters.translation;
+                position.x -= Math.sin(-player.rotation.y) * -moveParamaters.translation;
+                position.z -= Math.cos(-player.rotation.y) * moveParamaters.translation;
                 break;
             case "down":
-                position.x -= Math.sin(camera.rotation.y) * -moveParamaters.translation;
-                position.z += Math.cos(camera.rotation.y) * moveParamaters.translation;
+                position.x -= Math.sin(player.rotation.y) * -moveParamaters.translation;
+                position.z += Math.cos(player.rotation.y) * moveParamaters.translation;
                 break;
             case "left":
                 rotation += moveParamaters.rotation;
@@ -235,8 +249,8 @@
         }
 
         // Current position on the map
-        var tx = Math.abs(Math.floor(((cameraHelper.origin.x + (camera.position.x * -1)) / 100)));
-        var ty = Math.abs(Math.floor(((cameraHelper.origin.z + (camera.position.z * -1)) / 100)));
+        var tx = Math.abs(Math.floor(((cameraHelper.origin.x + (player.position.x * -1)) / 100)));
+        var ty = Math.abs(Math.floor(((cameraHelper.origin.z + (player.position.z * -1)) / 100)));
 
         // next position
         var newTx = Math.abs(Math.floor(((cameraHelper.origin.x + (position.x * -1) + (offset)) / 100)));
@@ -264,9 +278,9 @@
         }
 
         if (collides == false) {
-            camera.rotation.y = rotation;
-            camera.position.x = position.x;
-            camera.position.z = position.z;
+            player.rotation.y = rotation;
+            player.position.x = position.x;
+            player.position.z = position.z;
 
             miniMap.update({
                 x: newTx,
@@ -281,7 +295,6 @@
         if (running) {
             update();
             draw();
-            window.requestAnimationFrame(mainLoop, renderer.domElement);
         } else {
             endScreen();
         }
@@ -327,7 +340,7 @@
     // Game starting
     function launch() {
         initializeScene();
-        mainLoop();
+        updateVREffect();
     }
 
     window.onload = function() {
