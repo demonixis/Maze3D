@@ -2,8 +2,15 @@
     var width = window.innerWidth * 0.995;
     var height = window.innerHeight * 0.995;
     var canvasContainer = document.getElementById("canvasContainer");
-    var renderer, camera, scene;
-    var input, miniMap, levelHelper, CameraHelper;
+    var renderer = null;
+	var camera = null;
+	var	scene = null;
+	var effect = null;
+	var controls = null;
+    var input = null;
+	var miniMap = null; 
+	var levelHelper = null;
+	var CameraHelper = null;
     var map = new Array();
     var running = true;
 
@@ -26,9 +33,26 @@
         input = new Demonixis.Input();
         levelHelper = new Demonixis.GameHelper.LevelHelper();
         cameraHelper = new Demonixis.GameHelper.CameraHelper(camera);
+		
+		controls = new THREE.VRControls(camera);
+		effect = new THREE.VREffect(renderer);
+		
+		if (navigator.getVRDisplays) {
+			navigator.getVRDisplays()
+				.then( function(displays) {
+					effect.setVRDisplay(displays[0]);
+					controls.setVRDisplay(displays[0]);
+				})
+				.catch( function () {
+					// no displays
+				});
+
+			document.body.appendChild(WEBVR.getButton(effect));
+		}
 
         window.addEventListener("resize", function() {
             renderer.setSize(window.innerWidth, window.innerHeight);
+			effect.setSize( window.innerWidth, window.innerHeight );
         });
 
         var messageContainer = document.createElement("div");
@@ -169,10 +193,14 @@
         } else if (input.joykeys.right) {
             moveCamera("right", params);
         }
+		
+		controls.update();
     }
 
     function draw() {
+		//effect.requestAnimationFrame(draw);
         renderer.render(scene, camera);
+		//effect.render(scene, camera);
     }
 
     function moveCamera(direction, delta) {
